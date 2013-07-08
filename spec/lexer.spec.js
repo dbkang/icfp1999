@@ -5,7 +5,7 @@ var lexer = require('../src/lexer.js');
 describe('lexer', function () {
   it('should correctly tokenize a file full of spaces and parentheses given matchers for space and parentheses',
      function (done) {
-       lexer.lexer(
+       lexer.tokenizeFileAsync(
          'inputs/test/spaceParens.test',
          [lexer.matchers.spaceMatcher,
           lexer.matchers.leftParenMatcher,

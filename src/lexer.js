@@ -16,13 +16,27 @@ function rightParenMatcher(str, index) {
   if (str.charAt(index).search(/^\)/) == -1) return false; else return { tokens: [')'], index: index + 1 };  
 }
 
-
-// file: file name
-// matchers: an array of matchers to try
-// success: success callback
-// error: error callback
-function lexer(file, matchers, success, error) {
+function tokenizeFileAsync(file, matchers, success, error) {
   fs.readFile(file, { encoding: 'ascii' }, function (err, stream) {
+    if (err) error();
+    else {
+      var result = tokenize(stream, matchers);
+      if (result) {
+        success(result);
+      }
+      else {
+        error();
+      }
+    }
+  });
+}
+
+
+
+// stream: stream to tokenize - string for now
+// matchers: an array of matchers to try
+// returns false if failed, an array of tokens if succeeded
+function tokenize(stream, matchers) {
     var index = 0;
     var matchedTokens = [];
     var currentMatch;
@@ -37,15 +51,14 @@ function lexer(file, matchers, success, error) {
         index = currentMatch.index;
       }
       else {
-        error();
-        break;
+        return false;
       }
     }
-    success(matchedTokens);
-  });
+  return matchedTokens;
 }
 
-exports.lexer = lexer;
+exports.tokenize = tokenize;
+exports.tokenizeFileAsync = tokenizeFileAsync;
 exports.matchers = {
   spaceMatcher: spaceMatcher,
   leftParenMatcher: leftParenMatcher,
