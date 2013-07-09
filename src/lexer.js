@@ -13,6 +13,8 @@ keywordArray.forEach(function (k, i) {
   keywords[k] = function() { return k; };
 });
 
+var LPAREN = function () { return '('; };
+var RPAREN = function () { return ')'; };
 
 // matchers consume a stream and return matched tokens and new index.  returns false if not applicable
 function spaceMatcher(str, index) {
@@ -21,11 +23,11 @@ function spaceMatcher(str, index) {
 }
 
 function leftParenMatcher(str, index) {
-  if (str.charAt(index) != '(') return false; else return { tokens: ['('], index: index + 1 };  
+  if (str.charAt(index) != '(') return false; else return { tokens: [LPAREN], index: index + 1 };  
 }
 
 function rightParenMatcher(str, index) {
-  if (str.charAt(index) != ')') return false; else return { tokens: [')'], index: index + 1 };  
+  if (str.charAt(index) != ')') return false; else return { tokens: [RPAREN], index: index + 1 };  
 }
 
 function intMatcher(str, index) {
@@ -115,3 +117,7 @@ exports.matchers = {
   ]
 };
 exports.keywords = keywords;
+exports.tokens = {
+  LPAREN: LPAREN,
+  RPAREN: RPAREN
+};
