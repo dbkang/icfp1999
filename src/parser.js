@@ -86,16 +86,16 @@ function string(tokens, index) {
   else return false;
 }
 
-var parseValueSet = function(tokens, index) {
+var valueSet = function(tokens, index) {
   var result= tupleMany([elem(lexer.tokens.LPAREN), many(number), elem(lexer.tokens.RPAREN)])(tokens, index);
   if (result) return { tree: result.tree[1], index: result.index };
   else return false;
 }
 
-var parseNewState = or([number, elem(lexer.keywords._)]);
+var newState = or([number, elem(lexer.keywords._)]);
 
-exports.parseNewState = parseNewState;
-exports.parseValueSet = parseValueSet;
+exports.newState = newState;
+exports.valueSet = valueSet;
 exports.empty = empty;
 exports.elem = elem;
 exports.many = many;

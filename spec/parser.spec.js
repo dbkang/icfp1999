@@ -80,28 +80,28 @@ describe('parser', function () {
 
 
   it('parseValueSet should parse according to ValueSet production rule', function () {
-    expect(parser.parseValueSet([LPAREN, RPAREN], 0)).toEqual({ tree: [], index: 2});
-    expect(parser.parseValueSet([1, 2, LPAREN, 5, 2, 3, RPAREN], 2)).toEqual({
+    expect(parser.valueSet([LPAREN, RPAREN], 0)).toEqual({ tree: [], index: 2});
+    expect(parser.valueSet([1, 2, LPAREN, 5, 2, 3, RPAREN], 2)).toEqual({
       tree: [5, 2, 3],
       index: 7
     });
-    expect(parser.parseValueSet([1, 2, LPAREN, 5, 2, RPAREN, 3], 2)).toEqual({
+    expect(parser.valueSet([1, 2, LPAREN, 5, 2, RPAREN, 3], 2)).toEqual({
       tree: [5, 2],
       index: 6
     });
-    expect(parser.parseValueSet([1, 5, LPAREN, 5, 2])).toBe(false);
+    expect(parser.valueSet([1, 5, LPAREN, 5, 2])).toBe(false);
   });
 
   it('parseNewState should parse according to NewState production rule', function () {
-    expect(parser.parseNewState([5, lexer.keywords._, LPAREN], 0)).toEqual({
+    expect(parser.newState([5, lexer.keywords._, LPAREN], 0)).toEqual({
       tree: 5, index: 1
     });
-    expect(parser.parseNewState([5, lexer.keywords._, LPAREN], 1)).toEqual({
+    expect(parser.newState([5, lexer.keywords._, LPAREN], 1)).toEqual({
       tree: lexer.keywords._, index: 2
     });
 
-    expect(parser.parseNewState([5, lexer.keywords._, LPAREN], 2)).toBe(false);
-    expect(parser.parseNewState([5, lexer.keywords._, LPAREN], 3)).toBe(false);
+    expect(parser.newState([5, lexer.keywords._, LPAREN], 2)).toBe(false);
+    expect(parser.newState([5, lexer.keywords._, LPAREN], 3)).toBe(false);
 
   });
 
