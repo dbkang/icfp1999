@@ -79,7 +79,7 @@ describe('parser', function () {
   });
 
 
-  it('parseValueSet should parse according to ValueSet production rule', function () {
+  it('valueSet should parse according to ValueSet production rule', function () {
     expect(parser.valueSet([LPAREN, RPAREN], 0)).toEqual({ tree: [], index: 2});
     expect(parser.valueSet([1, 2, LPAREN, 5, 2, 3, RPAREN], 2)).toEqual({
       tree: [5, 2, 3],
@@ -92,7 +92,7 @@ describe('parser', function () {
     expect(parser.valueSet([1, 5, LPAREN, 5, 2])).toBe(false);
   });
 
-  it('parseNewState should parse according to NewState production rule', function () {
+  it('newState should parse according to NewState production rule', function () {
     expect(parser.newState([5, lexer.keywords._, LPAREN], 0)).toEqual({
       tree: 5, index: 1
     });

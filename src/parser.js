@@ -47,8 +47,7 @@ function empty(value) {
 function tupleMany(parsers) {
   var tuple2Curried = function (parser1, parser2) {
     return tuple2(parser1, parser2, function (a, b) {
-      a.push(b);
-      return a;
+      return a.concat([b]);
     });
   };
   return parsers.reduce(tuple2Curried, empty([]));
@@ -86,13 +85,68 @@ function string(tokens, index) {
   else return false;
 }
 
-var valueSet = function(tokens, index) {
-  var result= tupleMany([elem(lexer.tokens.LPAREN), many(number), elem(lexer.tokens.RPAREN)])(tokens, index);
-  if (result) return { tree: result.tree[1], index: result.index };
-  else return false;
+function compose(parser, f) {
+  return function(tokens, index) {
+    var result = parser(tokens, index);
+    if (result) return { tree: f(result.tree), index: result.index };
+    else return false;
+  };
 }
 
+function stripFirstLast(k) {
+  k.pop();
+  k.shift();
+  return k;
+}
+
+var lparen = elem(lexer.tokens.LPAREN);
+var rparen = elem(lexer.tokens.RPAREN);
+
+var tupleManyParens = function(parsers) {
+  parsers = parsers.concat(rparen);
+  parsers.shift(lparen);
+  return compose(tupleMany(parsers), stripFirstLast);
+}
+
+var elemParens = function(parser) {
+  var parsers = [lparen, parser, rparen];
+  return compose(tupleMany(parsers), function (k) { return k[1]; });  
+}
+
+
+var valueSet = elemParens(many(number));
+                      
 var newState = or([number, elem(lexer.keywords._)]);
+
+var variable = compose(tupleMany([lparen, elem(lexer.tokens.VAR), string, rparen]), stripFirstLast);
+
+
+// essentially forward declarations since Javascript is eager
+var conditionRec = function(tokens, index) { return condition(tokens, index) };
+var statementRec = function(tokens, index) { return statement(tokens, index) };
+
+
+var condition = or(tupleManyParens([elem(lexer.tokens.EQUALS), variable, number]),
+                   compose(tupleMany([lparen, elem(lexer.tokens.AND), conditionRec, rparen]),
+                           function (k) { k[2].unshift(k[1]); return k[2]}),
+                   compose(tupleMany([lparen, elem(lexer.tokens.OR), conditionRec, rparen]),
+                           function (k) { k[2].unshift(k[1]); return k[2]}));
+
+var arm = tupleManyParens([elem(lexer.tokens.ARM), valueSet, statementRec]);
+
+var elseif = tupleManyParens([elem(lexer.tokens.ELSEIF), condition, statementRec]);
+
+var arms = elemParens(many(arm));
+var elseifs = elemParens(many(elseif));
+
+var statement = or(tupleManyParens([elem(lexer.tokens.IF), condition, statementRec, elseifs, statementRec]),
+                   tupleManyParens([elem(lexer.tokens.DECISION), newState, string]),
+                   tupleManyParens([elem(lexer.tokens.CASE), variable, arms, statementRec]));
+
+var rule = tupleManyParens([many(number), statement]);
+
+var character = elemParens(many(rule));
+
 
 exports.newState = newState;
 exports.valueSet = valueSet;
