@@ -2,6 +2,8 @@
 
 var lexer = require('../src/lexer.js');
 var parser = require('../src/parser.js');
+var util = require('util');
+var fs = require('fs');
 
 describe('parser', function () {
   var LPAREN = lexer.tokens.LPAREN;
@@ -103,6 +105,57 @@ describe('parser', function () {
     expect(parser.newState([5, lexer.keywords._, LPAREN], 2)).toBe(false);
     expect(parser.newState([5, lexer.keywords._, LPAREN], 3)).toBe(false);
 
+  });
+
+  it('variable should parse according to variable production rule', function () {
+    expect(parser.variable([1, LPAREN, lexer.keywords.VAR, "string", RPAREN], 1)).toEqual({
+      tree: [lexer.keywords.VAR, "string"], index: 5
+    });
+    expect(parser.variable([1, LPAREN, lexer.keywords.VAR, "string", RPAREN], 7)).toBe(false);
+    expect(parser.variable([1, LPAREN, lexer.keywords.VAR, "string", RPAREN], 2)).toBe(false);
+  });
+
+  it('condition should parse according to condition production rule', function () {
+    var cond1 = [LPAREN, lexer.keywords.EQUALS, LPAREN, lexer.keywords.VAR, "var", RPAREN, 25, RPAREN];
+    var cond2 = [LPAREN, lexer.keywords.EQUALS, LPAREN, lexer.keywords.VAR, "meh", RPAREN, 10, RPAREN];
+    var cond3 = [LPAREN, lexer.keywords.AND].concat(cond1, cond2, RPAREN);
+    var cond4 = [LPAREN, lexer.keywords.OR].concat(cond1, cond2, RPAREN);
+    expect(parser.condition(cond1, 0)).toEqual({
+      tree: [lexer.keywords.EQUALS, [lexer.keywords.VAR, "var"], 25],
+      index: 8
+    });
+    expect(parser.condition(cond2, 0)).toEqual({
+      tree: [lexer.keywords.EQUALS, [lexer.keywords.VAR, "meh"], 10],
+      index: 8
+    });
+    expect(parser.condition([LPAREN, lexer.keywords.AND, RPAREN], 0)).toEqual({
+      tree: [lexer.keywords.AND], index: 3
+    });
+    expect(parser.condition([LPAREN, lexer.keywords.OR, RPAREN], 0)).toEqual({
+      tree: [lexer.keywords.OR], index: 3
+    });
+    expect(parser.condition(cond3, 0)).toEqual({
+      tree: [lexer.keywords.AND,
+             [lexer.keywords.EQUALS, [lexer.keywords.VAR, "var"], 25],
+             [lexer.keywords.EQUALS, [lexer.keywords.VAR, "meh"], 10]],
+      index: 19
+    });
+
+    expect(parser.condition(cond4, 0)).toEqual({
+      tree: [lexer.keywords.OR,
+             [lexer.keywords.EQUALS, [lexer.keywords.VAR, "var"], 25],
+             [lexer.keywords.EQUALS, [lexer.keywords.VAR, "meh"], 10]],
+      index: 19
+    });
+
+  });
+
+
+  it('', function () {
+    var file = fs.readFileSync('inputs/alpha0.icfp', { encoding: 'ascii' });
+    var tokens = lexer.tokenize(file, lexer.matchers.all);
+    var characterParsed = parser.character(tokens, 0);
+    console.log(util.inspect(characterParsed.tree, { depth: null }));
   });
 
 });

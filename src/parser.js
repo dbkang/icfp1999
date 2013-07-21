@@ -104,7 +104,7 @@ var rparen = elem(lexer.tokens.RPAREN);
 
 var tupleManyParens = function(parsers) {
   parsers = parsers.concat(rparen);
-  parsers.shift(lparen);
+  parsers.unshift(lparen);
   return compose(tupleMany(parsers), stripFirstLast);
 }
 
@@ -118,30 +118,29 @@ var valueSet = elemParens(many(number));
                       
 var newState = or([number, elem(lexer.keywords._)]);
 
-var variable = compose(tupleMany([lparen, elem(lexer.tokens.VAR), string, rparen]), stripFirstLast);
-
+var variable = tupleManyParens([elem(lexer.keywords.VAR), string]);
 
 // essentially forward declarations since Javascript is eager
 var conditionRec = function(tokens, index) { return condition(tokens, index) };
 var statementRec = function(tokens, index) { return statement(tokens, index) };
 
 
-var condition = or(tupleManyParens([elem(lexer.tokens.EQUALS), variable, number]),
-                   compose(tupleMany([lparen, elem(lexer.tokens.AND), conditionRec, rparen]),
-                           function (k) { k[2].unshift(k[1]); return k[2]}),
-                   compose(tupleMany([lparen, elem(lexer.tokens.OR), conditionRec, rparen]),
-                           function (k) { k[2].unshift(k[1]); return k[2]}));
+var condition = or([tupleManyParens([elem(lexer.keywords.EQUALS), variable, number]),
+                    compose(tupleMany([lparen, elem(lexer.keywords.AND), many(conditionRec), rparen]),
+                            function (k) { k[2].unshift(k[1]); return k[2]}),
+                    compose(tupleMany([lparen, elem(lexer.keywords.OR), many(conditionRec), rparen]),
+                            function (k) { k[2].unshift(k[1]); return k[2]})]);
 
-var arm = tupleManyParens([elem(lexer.tokens.ARM), valueSet, statementRec]);
+var arm = tupleManyParens([elem(lexer.keywords.ARM), valueSet, statementRec]);
 
-var elseif = tupleManyParens([elem(lexer.tokens.ELSEIF), condition, statementRec]);
+var elseif = tupleManyParens([elem(lexer.keywords.ELSEIF), condition, statementRec]);
 
 var arms = elemParens(many(arm));
 var elseifs = elemParens(many(elseif));
 
-var statement = or(tupleManyParens([elem(lexer.tokens.IF), condition, statementRec, elseifs, statementRec]),
-                   tupleManyParens([elem(lexer.tokens.DECISION), newState, string]),
-                   tupleManyParens([elem(lexer.tokens.CASE), variable, arms, statementRec]));
+var statement = or([tupleManyParens([elem(lexer.keywords.IF), condition, statementRec, elseifs, statementRec]),
+                    tupleManyParens([elem(lexer.keywords.DECISION), newState, string]),
+                    tupleManyParens([elem(lexer.keywords.CASE), variable, arms, statementRec])]);
 
 var rule = tupleManyParens([many(number), statement]);
 
@@ -159,3 +158,7 @@ exports.or = or;
 exports.number = number;
 exports.string = string;
 
+exports.variable = variable;
+exports.condition = condition;
+
+exports.character = character;

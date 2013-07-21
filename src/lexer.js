@@ -10,11 +10,12 @@ var keywordArray = [
 var keywords = {};
 
 keywordArray.forEach(function (k, i) {
-  keywords[k] = function() { return k; };
+  keywords[k] = { type: 'keyword', value: k };
 });
 
-var LPAREN = function () { return '('; };
-var RPAREN = function () { return ')'; };
+var LPAREN = { type: 'token', value: '(' };
+var RPAREN = { type: 'token', value: '(' };
+
 
 // matchers consume a stream and return matched tokens and new index.  returns false if not applicable
 function spaceMatcher(str, index) {
