@@ -151,11 +151,15 @@ describe('parser', function () {
   });
 
 
+
+  // TODO: convert this to an actual test
   it('', function () {
-    var file = fs.readFileSync('inputs/alpha0.icfp', { encoding: 'ascii' });
+    var file = fs.readFileSync('inputs/sparc3.icfp', { encoding: 'ascii' });
     var tokens = lexer.tokenize(file, lexer.matchers.all);
     var characterParsed = parser.character(tokens, 0);
-    console.log(util.inspect(characterParsed.tree, { depth: null }));
+    //console.log(characterParsed);
+    //console.log(util.inspect(characterParsed.tree, { depth: null }));
   });
 
 });
+
