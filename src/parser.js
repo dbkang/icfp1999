@@ -146,6 +146,13 @@ var rule = tupleManyParens([many(number), statement]);
 
 var character = elemParens(many(rule));
 
+function parseFile(filename) {
+  var file = fs.readFileSync(filename, { encoding: 'ascii' });
+  var tokens = lexer.tokenize(file, lexer.matchers.all);
+  var characterParsed = character(tokens, 0);
+  return characterParsed.tree;
+}
+
 
 exports.newState = newState;
 exports.valueSet = valueSet;
@@ -163,3 +170,4 @@ exports.condition = condition;
 
 exports.character = character;
 
+exports.parseFile = parseFile;

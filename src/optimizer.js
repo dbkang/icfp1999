@@ -35,6 +35,10 @@ function programSize(parseTree) {
     if (parseTree[0] == lexer.keywords.EQUALS) return 6;
     if (parseTree[0] == lexer.keywords.CASE)
       return 10 + programSize(parseTree[3]) + programSize(parseTree[2]) + span(parseTree[2]);
+
+    return parseTree.map(programSize).reduce(function (r, k) { return r + k; });
   }
+  else return 0;
 }
 
+exports.programSize = programSize;
